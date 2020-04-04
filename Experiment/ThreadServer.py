@@ -93,8 +93,6 @@ def GCF(x, y):
     
     return gcf
 
-flist = ["count", "convert", "game", "palindrome", "gcf", "reverse", "time", "hi", "Hi"] #shto hala
-
 class ClientThread(threading.Thread):
     def __init__(self,clientAddress,clientsocket):
         threading.Thread.__init__(self)
@@ -103,12 +101,12 @@ class ClientThread(threading.Thread):
     def run(self):
         self.csocket.send(bytes("Hi...",'utf-8'))
         msg = ''
+        flist = ["count", "convert", "game", "palindrome", "gcf", "reverse", "time", "hi", "Hi"]
         while True:
             data = self.csocket.recv(2048)
             msg = data.decode()
             vinput = rexp(msg)
             if(vinput[0] == 'count'):
-                print ("Received from client: ", msg)
                 exe = COUNT(vinput[1])
                 self.csocket.send(bytes(exe,'UTF-8'))
                 print ("Received from client: ", msg)
@@ -124,11 +122,11 @@ class ClientThread(threading.Thread):
                 print ("Received from client: ", msg)
                 exe = Time()
                 self.csocket.send(bytes(exe,'UTF-8'))
-                print ("Received from client: ", msg)
             elif(vinput[0] == 'game'):
                 print ("Received from client: ", msg)
                 exe = GAME()
-                self.csocket.send(bytes(exe,'UTF-8'))
+                listToStr = ' '.join(map(str, exe)) #list to string
+                self.csocket.send(bytes(listToStr,'UTF-8'))
             elif(vinput[0] == 'gcf'):
                 print ("Received from client: ", msg)
                 exe = GCF(int(vinput[1]), int(vinput[2]))
@@ -150,12 +148,13 @@ class ClientThread(threading.Thread):
                 print ("Received from client: ", msg)
                 exe = milesToKm(float(vinput[2]))
                 self.csocket.send(bytes(exe,'UTF-8'))
+            elif vinput[0] not in flist:
+                print(vinput[0])
+                continue
             elif vinput[0]=='bye':
                 print ("From client", msg)
                 self.csocket.send(bytes(msg,'UTF-8'))
                 break
-            elif vinput[0] not in flist:
-                continue
         print ("Client at ", clientAddress , " disconnected...")
 LOCALHOST = "127.0.0.1"
 PORT = 8092
