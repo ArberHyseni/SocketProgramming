@@ -150,6 +150,8 @@ class ClientThread(threading.Thread):
                 self.csocket.send(bytes(exe,'UTF-8'))
             elif vinput[0] not in flist:
                 print(vinput[0])
+                ignore = "."
+                self.csocket.send(bytes(ignore,'UTF-8')) # para ksaj veq kjo ska bo, watch out
                 continue
             elif vinput[0]=='bye':
                 print ("From client", msg)
