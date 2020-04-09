@@ -1,7 +1,6 @@
 import socket, threading, re
 from random import seed, randint
 from datetime import datetime
-from ipaddress import IPv4Address, IPv4Network
 #client input validation
 def regex(string):
     string = string.lower()
@@ -20,7 +19,7 @@ def COUNT(value):
             elif char not in list1 and char>="a" and char<="z":
                 con+=1
     else:
-        raise Exception("Lejohen vetem shkronja te alfabetit.")
+        return "Lejohen vetem shkronja te alfabetit."
 
     result = f'Consonant {con} Vowel {vow}' #return permes f string
     return result
@@ -52,9 +51,10 @@ def REVERSE(s):
         revres = s[::-1]
     elif not (s.isalpha()):
         #Show exception on terminal for invalid input
-        raise Exception("Only words from the alphabet are allowed") 
+        return "Only words from the alphabet are allowed"
     
     return revres
+    
 
 def Palindrome(s):
     true = "True"
@@ -99,15 +99,12 @@ def passwordStrength(s):
     # Enter password text
     length = re.compile(r'(\w{8,})')  # Check if password has atleast 8 characters
     lower = re.compile(r'[a-z]+') # Check if at least one lowercase letter
-    upper = re.compile(r'[A-Z]+')# Check if atleast one upper case letter
     digit = re.compile(r'[0-9]+') # Check if at least one digit.
     special = re.compile(r'[!@#$%^&*_.]+')
     if length.findall(s) == []:  # Checks if the password does not contain 8 characters, findall() kthen string array
         result = 'Your Password must contain at least 8 characters'
     elif lower.findall(s)==[]: # Checks if the password does not contain a lowercase character
         result = 'Your Password must contain at least one lowercase character'
-    elif upper.findall(s)==[]: # Checks if the password does not contain an uppercase character
-        result = 'Your Password must contain at least one uppercase character'
     elif digit.findall(s)==[]: # Checks if the password does not contain a digit character
         result = 'Your Password must contain at least one digit character'
     elif special.findall(s)==[]: # Checks if the password does not contain a special char
@@ -117,21 +114,17 @@ def passwordStrength(s):
         
     return result
 
-def ipclass(s):
-    try:
-        ip = IPv4Address(s) #represent and manipulate single ipv4 addresses
-        # ipv4network represents and manipulates 32-bit IPv4 network and addresses.
-        classA = IPv4Network(("1.0.0.1", "255.0.0.0")) # or IPv4Network("10.0.0.0/8")
-        classB = IPv4Network(("128.1.0.1", "255.255.0.0")) # or IPv4Network("128.1.0.1/16")
-        classC = IPv4Network(("192.0.1.1", "255.255.255.0")) # or IPv4Network("192.0.1.1/24")
-        if ip in classA:
-            return "Given ip is in Class A"
-        elif ip in classB:
-            return "Given ip is in Class B"
-        elif ip in classC:
-            return "Given ip is in Class C"
-    except:
-        return "error"
+def Fibonacci(n):
+   if n<0:
+      print("No such number allowed!")
+   # First Fibonacci number is 0 (0, 1, 1, 2, 3, 5, 8, 13, 21, 34, ...)
+   elif n==1:
+      return 0
+   # Second Fibonacci number
+   elif n==2:
+      return 1
+   else:
+      return Fibonacci(n-1)+Fibonacci(n-2)
 
 class ClientThread(threading.Thread):
     def __init__(self,clientAddress,clientsocket):
@@ -141,7 +134,7 @@ class ClientThread(threading.Thread):
     def run(self): #qekjo run(self) edhe init ma nalt spo e kom bash te qarte qa bojn, e po ma hupin zumin qito hahahaha
         self.csocket.send(bytes("Hi...",'utf-8'))
         msg = ''
-        flist = ["count", "convert", "game", "palindrome", "gcf", "reverse", "time", "hi", "Hi", "ipclass", "passwordstrength"]
+        flist = ["count", "convert", "game", "palindrome", "gcf", "reverse", "time", "hi", "Hi", "fibonacci", "passwordstrength"]
         while True:
             data = self.csocket.recv(2048) #ose 1024
             msg = data.decode()
@@ -175,56 +168,74 @@ class ClientThread(threading.Thread):
                 exe = GAME()
                 listToStr = ' '.join(map(str, exe)) #list to string
                 self.csocket.send(bytes(listToStr,'UTF-8'))
-            elif(vinput[0] == 'gcf'): #---------------------------------------------- SHTO
+            elif(vinput[0] == 'gcf'): 
+                if(vinput[1].isdigit() and vinput[2].isdigit()):
+                    print ("Received from client: ", msg)
+                    exe = GCF(int(vinput[1]), int(vinput[2]))
+                    exes = str(exe) #int to str
+                    self.csocket.send(bytes(exes,'UTF-8'))
+                else:
+                    print ("Received from client: ", msg)
+                    self.csocket.send(bytes("Only Integers allowed",'UTF-8'))
+            elif(vinput[0] == 'convert' and vinput[1] == 'cmtofeet'): #looks ugly but no other option!
                 print ("Received from client: ", msg)
-                exe = GCF(int(vinput[1]), int(vinput[2]))
-                exes = str(exe) #int to str
-                self.csocket.send(bytes(exes,'UTF-8'))
-            elif(vinput[0] == 'convert' and vinput[1] == 'cmtofeet'):
-                print ("Received from client: ", msg)
-                exe = cmToFeet(float(vinput[2]))
-                self.csocket.send(bytes(exe,'UTF-8'))
+                if vinput[2].isdigit():
+                    exe = cmToFeet(float(vinput[2]))
+                    self.csocket.send(bytes(exe,'UTF-8'))
+                else:
+                    self.csocket.send(bytes("Only numbers allowed",'UTF-8'))
             elif(vinput[0] == 'convert' and vinput[1] == 'feettocm'):
                 print ("Received from client: ", msg)
-                exe = feetToCm(float(vinput[2]))
-                self.csocket.send(bytes(exe,'UTF-8'))
+                if vinput[2].isdigit():
+                    exe = feetToCm(float(vinput[2]))
+                    self.csocket.send(bytes(exe,'UTF-8'))
+                else:
+                    self.csocket.send(bytes("Only numbers allowed",'UTF-8'))
             elif(vinput[0] == 'convert' and vinput[1] == 'kmtomiles'):
                 print ("Received from client: ", msg)
-                exe = kmToMiles(float(vinput[2]))
-                self.csocket.send(bytes(exe,'UTF-8'))
+                if vinput[2].isdigit():
+                    exe = kmToMiles(float(vinput[2]))
+                    self.csocket.send(bytes(exe,'UTF-8'))
+                else:
+                    self.csocket.send(bytes("Only numbers allowed",'UTF-8'))
             elif(vinput[0] == 'convert' and vinput[1] == 'milestokm'):
                 print ("Received from client: ", msg)
-                exe = milesToKm(float(vinput[2]))
-                self.csocket.send(bytes(exe,'UTF-8'))
-            elif(vinput[0] == 'passwordstrength'): # E RE TESTOJE
+                if vinput[2].isdigit():
+                    exe = milesToKm(float(vinput[2]))
+                    self.csocket.send(bytes(exe,'UTF-8'))
+                else:
+                    self.csocket.send(bytes("Only numbers allowed",'UTF-8'))
+            elif(vinput[0] == 'passwordstrength'):#extra
                 asteriks = '*' * len(vinput[1])
                 print ("Received from client: " + vinput[0] + ' ' + asteriks)
                 exe = passwordStrength(vinput[1])
                 self.csocket.send(bytes(exe,'UTF-8'))
-            elif(vinput[0] == 'ipclass'): # e re
-                print ("Received from client: ", msg)
-                exe = ipclass(vinput[1])
-                self.csocket.send(bytes(exe,'UTF-8'))
-            elif vinput[0] not in flist:
-                print(vinput[0])
-                exe = "<error>"
-                self.csocket.send(bytes(exe,'UTF-8'))
+            elif(vinput[0] == 'fibonacci'):
+                print("Recieved from client: ", msg)
+                if (vinput[1].isdigit()):
+                    exe = str(Fibonacci(int(vinput[1])))
+                    self.csocket.send(bytes(exe,'UTF-8'))
+                else:
+                    self.csocket.send(bytes("Only integers allowed!",'UTF-8'))
             elif vinput[0]=='bye':
                 print ("From client", msg)
                 self.csocket.send(bytes(msg,'UTF-8'))
                 break
-            #elif qitu me bo diqka if input = 'changeport' ose 'reconnect'
-                #insert some code here
+            elif vinput[0] not in flist:
+                print(vinput[0])
+                exe = "<error>"
+                self.csocket.send(bytes(exe,'UTF-8'))
         print ("Client at ", clientAddress , " disconnected...")
 LOCALHOST = "localhost"
 PORT = 13000
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-server.bind((LOCALHOST, PORT))
+#The socket() call creates a socket in the specified domain and of the specified type.
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #AF_INET = Internet domain, SOCK_STREAM = stream socket for TCP protocol
+server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1) #The setsockopt function sets a socket option.
+server.bind((LOCALHOST, PORT)) #bind() associates the socket with its local address
 print("Server started")
 print("Waiting for client request..")
 while True:
     server.listen(1)
     clientsock, clientAddress = server.accept()
     newthread = ClientThread(clientAddress, clientsock)
-    newthread.start() # edhe qikjo pjese ne fund eshte, se body eshte krejt funksione qe i kom thirr
+    newthread.start()

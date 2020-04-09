@@ -1,6 +1,6 @@
 import socket
 #Set the port
-serverAddressPort   = ("localhost", 8093)
+serverAddressPort   = ("localhost", 13000)
 #Create a UDP socket connection
 clientSocket = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
